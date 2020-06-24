@@ -7,7 +7,11 @@ object Helper {
         tmp += 1
         tmp -= 3
         tmp += 4
-        return num + 1
+        tmp -= num
+        tmp += num
+        tmp *= 2
+        tmp /= 2
+        return tmp + 1
     }
 
     fun doSecondSomething(num: Int): Int {
@@ -15,6 +19,10 @@ object Helper {
         tmp -= 9
         tmp += 12
         tmp -= 3
-        return num + 2
+        tmp -= num
+        tmp += num
+        tmp *= 2
+        tmp /= 2
+        return tmp + 2
     }
 }
