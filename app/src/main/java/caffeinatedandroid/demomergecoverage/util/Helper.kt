@@ -17,7 +17,8 @@ object Helper {
     fun doSecondSomething(num: Int): Int {
         var tmp = num
         tmp -= 9
-        tmp += 12
+        tmp += 11
+        tmp += 1
         tmp -= 3
         tmp -= num
         tmp += num
