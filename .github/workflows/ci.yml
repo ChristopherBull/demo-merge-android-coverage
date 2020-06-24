@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    paths-ignore:
+      - "**.gitignore"
+      - "**.md"
+  pull_request:
+    paths-ignore:
+      - "**.gitignore"
+      - "**.md"
+
+jobs:
+  test:
+    name: Build, test, coverage
+    # Run on macOS, as currently it is the only runner with hardware acceleration (HAXM) installed
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            app/build
+            !app/build/jacoco
+            !app/build/outputs
+            !app/build/reports
+            !app/build/test-results
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      # Test and coverage
+      - name: Android tests (unit and instrumented)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          # Runs: Build, unit tests, instrumented tests, then combines coverage reports
+          script: ./gradlew jacocoCombinedTestReports
+      - name: Upload coverage to Code-Climate
+        uses: paambaati/codeclimate-action@v2.6.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          JACOCO_SOURCE_PATH: "${{github.workspace}}/app/src/main/java"
+        with:
+          # coverageCommand is required, but as coverage is calculated in previous step, skip by using 'echo'
+          coverageCommand: echo "Coverage already calculated - skipping calculating coverage"
+          coverageLocations: ${{github.workspace}}/app/build/reports/coverage/jacocoCombinedTestReports/jacocoCombinedTestReports.xml:jacoco
+      # Artifacts
+      - name: Upload unit test results as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test results (unit)
+          path: app/build/reports/tests/testDebugUnitTest
+      - name: Upload instrumented test results as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test results (instrumented)
+          path: app/build/reports/androidTests/connected
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: app/build/reports/coverage/jacocoCombinedTestReports

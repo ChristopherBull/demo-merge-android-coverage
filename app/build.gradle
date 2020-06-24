@@ -1,6 +1,65 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "$jacocoVersion"
+    reportsDir = file("$buildDir/reports/coverage")
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+}
+
+/**
+ * Task that generates JaCoCo (code coverage) report for Unit Tests, and combines the results
+ * with any coverage reports for the Instrumented Tests, resulting in one unified code coverage
+ * report.
+ *
+ * Works for Java and/or Kotlin projects.
+ */
+task jacocoCombinedTestReports(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+    group = "Verification"
+    description = "Creates JaCoCo test coverage report for Unit and Instrumented Tests (combined) on the Debug build"
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    // Files to exclude:
+    // Generated classes, platform classes, etc.
+    def excludes = [
+            '**/R.class',
+            '**/R$*.class',
+            '**/BuildConfig.*',
+            '**/Manifest*.*',
+            '**/*Test*.*',
+            'android/**/*.*'
+    ]
+
+    // generated classes
+    classDirectories.from = fileTree(
+            dir: "$buildDir/intermediates/classes/debug",
+            excludes: excludes
+    ) + fileTree(
+            dir: "$buildDir/tmp/kotlin-classes/debug",
+            excludes: excludes
+    )
+    // sources
+    sourceDirectories.from = [
+            android.sourceSets.main.java.srcDirs,
+            "src/main/kotlin"
+    ]
+    // Output and existing data
+    // Combine Unit test and Instrumented test reports
+    executionData.from = fileTree(dir: "$buildDir", includes: [
+            // Unit tests coverage data
+            "jacoco/testDebugUnitTest.exec",
+            // Instrumented tests coverage data
+            "outputs/code_coverage/debugAndroidTest/connected/*coverage.ec"
+    ])
+}
 
 android {
     compileSdkVersion 29
@@ -20,6 +79,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            testCoverageEnabled true
         }
     }
 }
