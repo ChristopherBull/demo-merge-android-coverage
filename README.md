@@ -43,7 +43,7 @@ In the [project-level `build.gradle`](build.gradle) file:
 
 ```gradle
 buildscript {
-    ext.jacocoVersion = '0.8.5'
+    ext.jacocoVersion = '0.8.7'
     dependencies {
         classpath "org.jacoco:org.jacoco.core:$jacocoVersion"
     }
@@ -57,11 +57,12 @@ apply plugin: 'jacoco'
 
 jacoco {
     toolVersion = "$jacocoVersion"
-    reportsDir = file("$buildDir/reports/coverage")
+    reportsDirectory = file("$buildDir/reports/coverage")
 }
 
 tasks.withType(Test) {
     jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
 }
 
 task jacocoCombinedTestReports(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
@@ -100,7 +101,7 @@ task jacocoCombinedTestReports(type: JacocoReport, dependsOn: ['testDebugUnitTes
     // Combine Unit test and Instrumented test reports
     executionData.from = fileTree(dir: "$buildDir", includes: [
             // Unit tests coverage data
-            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
             // Instrumented tests coverage data
             "outputs/code_coverage/debugAndroidTest/connected/*coverage.ec"
     ])
