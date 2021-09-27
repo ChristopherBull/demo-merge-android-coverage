@@ -34,17 +34,15 @@ jobs:
       - name: Android tests (unit and instrumented)
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
+          api-level: 30
           # Runs: Build, unit tests, instrumented tests, then combines coverage reports
           script: ./gradlew jacocoCombinedTestReports
       - name: Upload coverage to Code-Climate
-        uses: paambaati/codeclimate-action@v2.6.0
+        uses: paambaati/codeclimate-action@v2.7.5
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           JACOCO_SOURCE_PATH: "${{github.workspace}}/app/src/main/java"
         with:
-          # coverageCommand is required, but as coverage is calculated in previous step, skip by using 'echo'
-          coverageCommand: echo "Coverage already calculated - skipping calculating coverage"
           coverageLocations: ${{github.workspace}}/app/build/reports/coverage/jacocoCombinedTestReports/jacocoCombinedTestReports.xml:jacoco
       # Artifacts
       - name: Upload unit test results as artifact
