@@ -17,6 +17,11 @@ jobs:
     name: Build, test, coverage
     # Run on macOS, as currently it is the only runner with hardware acceleration (HAXM) installed
     runs-on: macOS-latest
+    strategy:
+      matrix:
+        # System Image for API 30 not yet available through the
+        # reactivecircus/android-emulator-runner Action, apparently
+        api-level: [ 29 ]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
@@ -24,11 +29,32 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           cache: 'gradle'
+      # Emulator preparation - AVD snapshot caching
+      - name: AVD cache
+        uses: actions/cache@v2
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
       # Test and coverage
       - name: Android tests (unit and instrumented)
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29 # System Image for API 30 not yet available through this Action, apparently
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
           # Runs: Build, unit tests, instrumented tests, then combines coverage reports
           script: ./gradlew jacocoCombinedTestReports
       - name: Upload coverage to Code-Climate
