@@ -1,7 +1,7 @@
 package caffeinatedandroid.demomergecoverage.util
 
 object Helper {
-    fun doFirstSomething(num: Int): Int {
+    fun doSomethingInUnitTest(num: Int): Int {
         var tmp = num
         tmp -= 2
         tmp += 1
@@ -14,7 +14,7 @@ object Helper {
         return tmp + 1
     }
 
-    fun doSecondSomething(num: Int): Int {
+    fun doSomethingInInstrumentedAndroidTest(num: Int): Int {
         var tmp = num
         tmp -= 9
         tmp += 11

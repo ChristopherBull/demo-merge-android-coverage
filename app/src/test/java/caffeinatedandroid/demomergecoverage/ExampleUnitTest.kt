@@ -1,6 +1,6 @@
 package caffeinatedandroid.demomergecoverage
 
-import caffeinatedandroid.demomergecoverage.util.Helper.doFirstSomething
+import caffeinatedandroid.demomergecoverage.util.Helper.doSomethingInUnitTest
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -13,11 +13,12 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        val result = 2 + 2
+        assertEquals(4, result)
     }
 
     @Test
     fun firstHelperFunctionTest() {
-        assertEquals(doFirstSomething(5), 6)
+        assertEquals(doSomethingInUnitTest(5), 6)
     }
 }

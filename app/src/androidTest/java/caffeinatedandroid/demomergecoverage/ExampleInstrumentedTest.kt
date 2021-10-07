@@ -2,7 +2,7 @@ package caffeinatedandroid.demomergecoverage
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import caffeinatedandroid.demomergecoverage.util.Helper.doSecondSomething
+import caffeinatedandroid.demomergecoverage.util.Helper.doSomethingInInstrumentedAndroidTest
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,6 +25,6 @@ class ExampleInstrumentedTest {
 
     @Test
     fun firstHelperFunctionTest() {
-        assertEquals(doSecondSomething(5), 7)
+        assertEquals(doSomethingInInstrumentedAndroidTest(5), 7)
     }
 }
